@@ -23,7 +23,7 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     # parser.add_argument("--device", type=int, default=0)
-    parser.add_argument("--device", type=int, default=0)                                                                                    #for changing camera (0 is laptop camera, 1 is webcam)
+    parser.add_argument("--device", type=int, default=0)                                                                                    #change camera: for changing camera
     
     parser.add_argument("--width", help='cap width', type=int, default=960)
     parser.add_argument("--height", help='cap height', type=int, default=540)
@@ -70,7 +70,7 @@ def main():
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(
         static_image_mode=use_static_image_mode,
-        max_num_hands=2,                                                                                                        #determimnes max num hands
+        max_num_hands=2,                                                                                                        #number of hands: determimnes max num hands
         min_detection_confidence=min_detection_confidence,
         min_tracking_confidence=min_tracking_confidence,
     )
@@ -80,7 +80,7 @@ def main():
     point_history_classifier = PointHistoryClassifier()
 
     # Read labels ###########################################################
-    with open('model/keypoint_classifier/keypoint_classifier_label3.csv',                                                                                #determines what file to access gesture names from
+    with open('model/keypoint_classifier/keypoint_classifier_label3.csv',                                                                                #gesture names file: determines what file to access gesture names from
               encoding='utf-8-sig') as f:
         keypoint_classifier_labels = csv.reader(f)
         keypoint_classifier_labels = [
@@ -110,11 +110,13 @@ def main():
     while True:
         fps = cvFpsCalc.get()
 
-        # Process Key (ESC: end) #################################################
-        key = cv.waitKey(10)
+        # Process Key (ESC: end) ############################################## ###
+        key = cv.waitKey(5)                                                                                                #waitkey determines how long to wait for a key press (sort of determines frequency of while loop iterations)
+        # key = csv.waitKey(1)                                                                                              #key is int value of each key (esc --> 27, a -> 97, b -> 98, etc.)
         if key == 27:  # ESC
             break
         number, mode = select_mode(key, mode)
+        # print("number: " + str(number))
 
         # Camera capture #####################################################
         ret, image = cap.read()
@@ -178,13 +180,13 @@ def main():
                 right_list_len = len(right_hand_gesture_history)
                 left_list_len = len(left_hand_gesture_history) 
 
-                # if hand_sign_id % 2 == 0 and right_list_len > 1 and right_hand_gesture_history[right_list_len - 1] != right_hand_gesture_history[right_list_len - 2]:
-                #     print(hand_gesture)
-                #     # key_press.test_press_keys(hand_gesture)
+                if hand_sign_id % 2 == 0 and right_list_len > 1 and right_hand_gesture_history[right_list_len - 1] != right_hand_gesture_history[right_list_len - 2]:
+                    print(hand_gesture)
+                    # key_press.test_press_keys(hand_gesture)
 
-                # if hand_sign_id % 2 != 0 and left_list_len > 1 and left_hand_gesture_history[left_list_len - 1] != left_hand_gesture_history[left_list_len - 2]:
-                #     print(hand_gesture)
-                #     # key_press.test_press_keys(hand_gesture)
+                if hand_sign_id % 2 != 0 and left_list_len > 1 and left_hand_gesture_history[left_list_len - 1] != left_hand_gesture_history[left_list_len - 2]:
+                    print(hand_gesture)
+                    # key_press.test_press_keys(hand_gesture)
 
                 # Finger gesture classification
                 finger_gesture_id = 0
@@ -222,6 +224,7 @@ def main():
 
 
 def select_mode(key, mode):
+    # print("key: " + str(key))                                                                            #what is key? how is number determined?                                                                                      
     number = -1
     if 48 <= key <= 57:  # 0 ~ 9
         number = key - 48
@@ -319,14 +322,15 @@ def pre_process_point_history(image, point_history):
 
 
 def logging_csv(number, mode, landmark_list, point_history_list):
+    # print("number: " + str(number))
     if mode == 0:
         pass
     if mode == 1 and (0 <= number <= 9):
-        # csv_path = 'model/keypoint_classifier/keypoint.csv'                                                                                                                           #determine what file to save keypoint training data to
-        csv_path = 'model/keypoint_classifier/automated_keypoints.csv'
+        csv_path = 'model/keypoint_classifier/automated_keypoints.csv'                                                                                          #where to store data points
         with open(csv_path, 'a', newline="") as f:
             writer = csv.writer(f)
             writer.writerow([number, *landmark_list])
+            print("data logged\n")
     if mode == 2 and (0 <= number <= 9):
         csv_path = 'model/point_history_classifier/point_history.csv'
         with open(csv_path, 'a', newline="") as f:
@@ -581,3 +585,6 @@ def draw_info(image, fps, mode, number):
 
 if __name__ == '__main__': 
     main()
+
+
+num_of_debugs = 0
